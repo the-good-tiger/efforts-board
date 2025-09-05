@@ -2,26 +2,28 @@ name: Process Daily Log
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
 
 jobs:
   process:
-    if: contains(github.event.issue.labels.*.name, 'log')
     runs-on: ubuntu-latest
+    # More flexible trigger condition
+    if: |
+      contains(github.event.issue.labels.*.name, 'log') ||
+      contains(github.event.issue.title, 'Daily Log') ||
+      github.event_name == 'workflow_dispatch'
+    
     permissions:
       contents: write
       issues: write
+      actions: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup GitHub CLI
         run: |
@@ -30,15 +32,28 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: pip install pyyaml
+
       - name: Process new log entry
-        run: python .github/scripts/process_data.py "${{ github.event.issue.title }}" "${{ github.event.issue.body }}" ${{ github.event.issue.number }}
+        run: |
+          python .github/scripts/process_data.py \
+          "${{ github.event.issue.title }}" \
+          "${{ toJSON(github.event.issue.body) }}" \
+          ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit and push updated data
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
           git add data.json
           git commit -m "CI: Update data from issue ${{ github.event.issue.number }}"
           git push
