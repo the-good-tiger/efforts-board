@@ -42,8 +42,9 @@ jobs:
         
       - name: Process new log entry
         run: |
-          # Write the issue body to a temporary file
-          echo '${{ toJSON(github.event.issue.body) }}' > /tmp/issue_body.txt
+          # Create a temporary file with the issue body content
+          echo '${{ github.event.issue.body }}' > /tmp/issue_body.txt
+          
           python .github/scripts/process_data.py \
           "${{ github.event.issue.title }}" \
           /tmp/issue_body.txt \
