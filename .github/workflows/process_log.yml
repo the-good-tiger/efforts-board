@@ -42,11 +42,11 @@ jobs:
         
       - name: Process new log entry
         run: |
-          # Escape the body content for shell
-          ESCAPED_BODY=$(echo '${{ toJSON(github.event.issue.body) }}' | jq -r .)
+          # Write the issue body to a temporary file
+          echo '${{ toJSON(github.event.issue.body) }}' > /tmp/issue_body.txt
           python .github/scripts/process_data.py \
           "${{ github.event.issue.title }}" \
-          "$ESCAPED_BODY" \
+          /tmp/issue_body.txt \
           ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
