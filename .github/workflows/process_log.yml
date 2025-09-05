@@ -42,7 +42,7 @@ jobs:
         run: |
           python .github/scripts/process_data.py \
           "${{ github.event.issue.title }}" \
-          "${{ toJSON(github.event.issue.body) }}" \
+          ${{ toJSON(github.event.issue.body) }} \
           ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
