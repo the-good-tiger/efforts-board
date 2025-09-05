@@ -3,41 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Self-Competition Leaderboard</title>
+    <title>Temporal Arena - Self Competition</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <h1>🏆 Self-Competition Leaderboard</h1>
-        <p>Ranking: Present Self vs Past Self vs Future Self</p>
-    </header>
+    <div class="container">
+        <header class="arena-header">
+            <h1>🕔 Temporal Arena</h1>
+            <p>Battling Your Past, Present, and Future Selves</p>
+        </header>
 
-    <main>
-        <section id="rankings-container" class="rankings">
-            <!-- JS will populate this -->
-        </section>
+        <div class="competition-status">
+            <div class="status-pill" id="statusPill">Loading battle status...</div>
+        </div>
 
-        <section class="chart-section">
-            <h2>Performance Score Comparison</h2>
-            <div class="chart-container">
-                <canvas id="scoreChart"></canvas>
+        <div class="competitors-grid">
+            <div class="competitor-card past-self">
+                <div class="corner-tag">Past Self</div>
+                <div class="avatar">
+                    <div class="avatar-icon">🕔</div>
+                    <div class="level">7-Day Avg</div>
+                </div>
+                <div class="score" id="pastScore">--</div>
+                <div class="metric-bars">
+                    <div class="metric">
+                        <span class="label">Score</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill past-score"></div>
+                        </div>
+                        <span class="value" id="pastScoreValue">--</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Time</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill past-time"></div>
+                        </div>
+                        <span class="value" id="pastTimeValue">--</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Bounty</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill past-bounty"></div>
+                        </div>
+                        <span class="value" id="pastBountyValue">--</span>
+                    </div>
+                </div>
             </div>
-        </section>
 
-        <section class="chart-section">
-            <h2>Time Investment Comparison (Minutes)</h2>
-            <div class="chart-container">
-                <canvas id="timeChart"></canvas>
+            <div class="vs-container">
+                <div class="vs-circle">VS</div>
+                <div class="battle-timer">Daily Battle</div>
             </div>
-        </section>
 
-        <section class="chart-section">
-            <h2>Bounty Earnings Comparison (USD)</h2>
-            <div class="chart-container">
-                <canvas id="bountyChart"></canvas>
+            <div class="competitor-card present-self">
+                <div class="corner-tag present-tag">Present Self</div>
+                <div class="avatar">
+                    <div class="avatar-icon">🔥</div>
+                    <div class="level">Today</div>
+                </div>
+                <div class="score" id="presentScore">--</div>
+                <div class="metric-bars">
+                    <div class="metric">
+                        <span class="label">Score</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill present-score"></div>
+                        </div>
+                        <span class="value" id="presentScoreValue">--</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Time</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill present-time"></div>
+                        </div>
+                        <span class="value" id="presentTimeValue">--</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Bounty</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill present-bounty"></div>
+                        </div>
+                        <span class="value" id="presentBountyValue">--</span>
+                    </div>
+                </div>
             </div>
-        </section>
-    </main>
+        </div>
+
+        <div class="future-contender">
+            <div class="future-header">
+                <h3>Future Self <span class="target">(20% Target)</span></h3>
+            </div>
+            <div class="future-metrics">
+                <div class="future-metric">
+                    <span class="label">Score Target</span>
+                    <div class="future-value" id="futureScore">--</div>
+                </div>
+                <div class="future-metric">
+                    <span class="label">Time Target</span>
+                    <div class="future-value" id="futureTime">--</div>
+                </div>
+                <div class="future-metric">
+                    <span class="label">Bounty Target</span>
+                    <div class="future-value" id="futureBounty">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-toggle">
+                <button class="toggle-btn active" data-metric="score">Score</button>
+                <button class="toggle-btn" data-metric="time">Time</button>
+                <button class="toggle-btn" data-metric="bounty">Bounty</button>
+            </div>
+            <div class="chart-section">
+                <div class="chart-container">
+                    <canvas id="battleChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="battle-report">
+            <h3>Today's Battle Report</h3>
+            <div class="report-content" id="battleReport">
+                <div class="loading">Calculating today's results...</div>
+            </div>
+        </div>
+
+        <div class="achievements">
+            <h3>Temporal Trophies</h3>
+            <div class="trophies-grid" id="trophiesContainer">
+                <!-- Will be populated by JS -->
+            </div>
+        </div>
+    </div>
 
     <footer>
         <p>Logged via GitHub Issues | Updated automatically</p>
