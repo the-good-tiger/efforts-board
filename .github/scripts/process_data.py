@@ -2,16 +2,17 @@ import json
 import os
 import re
 import sys
-import yaml
 from datetime import datetime
-from urllib.parse import parse_qs
 
 def parse_form_data(body):
     """
     Parse the structured form data from GitHub's issue form
     """
     try:
-        # Parse the YAML form data
+        # Remove JSON encoding if present
+        if body.startswith('"') and body.endswith('"'):
+            body = body[1:-1].replace('\\n', '\n')
+        
         parsed_data = {}
         lines = body.split('\n')
         
