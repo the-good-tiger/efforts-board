@@ -3,36 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bug Bounty Dashboard</title>
+    <title>Self-Competition Leaderboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>🐛 Self-Competition Dashboard</h1>
-        <p>Tracking progress against Past Self and Ideal Self</p>
+        <h1>🏆 Self-Competition Leaderboard</h1>
+        <p>Ranking: Present Self vs Past Self vs Future Self</p>
     </header>
 
     <main>
-        <section id="summary-container" class="summary">
+        <section id="rankings-container" class="rankings">
             <!-- JS will populate this -->
         </section>
 
         <section class="chart-section">
-            <h2>Effort Score</h2>
+            <h2>Performance Score Comparison</h2>
             <div class="chart-container">
                 <canvas id="scoreChart"></canvas>
             </div>
         </section>
 
         <section class="chart-section">
-            <h2>Time Investment (Minutes)</h2>
+            <h2>Time Investment Comparison (Minutes)</h2>
             <div class="chart-container">
                 <canvas id="timeChart"></canvas>
             </div>
         </section>
 
         <section class="chart-section">
-            <h2>Bounty Earned (USD)</h2>
+            <h2>Bounty Earnings Comparison (USD)</h2>
             <div class="chart-container">
                 <canvas id="bountyChart"></canvas>
             </div>

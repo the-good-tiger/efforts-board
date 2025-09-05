@@ -16,8 +16,8 @@ async function loadData() {
         const timeSpent = data.map(entry => entry.time_spent || 0);
         const bounty = data.map(entry => entry.bounty || 0);
 
-        // Calculate metrics for summary
-        updateSummary(data, scores, timeSpent, bounty);
+        // Calculate metrics for rankings
+        updateRankings(data, scores, timeSpent, bounty);
 
         // Create the charts
         createCharts(labels, scores, timeSpent, bounty);
@@ -28,8 +28,8 @@ async function loadData() {
     }
 }
 
-// Update the summary boxes with current metrics
-function updateSummary(data, scores, timeSpent, bounty) {
+// Update the ranking boxes with current metrics
+function updateRankings(data, scores, timeSpent, bounty) {
     const lastEntry = data[data.length - 1];
     const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD
 
@@ -41,24 +41,84 @@ function updateSummary(data, scores, timeSpent, bounty) {
     const recentTimeAvg = calculateMovingAverage(timeSpent).filter(v => v !== null).pop() || 0;
     const recentBountyAvg = calculateMovingAverage(bounty).filter(v => v !== null).pop() || 0;
 
-    document.getElementById('summary-container').innerHTML = `
-        <div class="metric-box">
-            <div class="metric-label">Today's Score</div>
-            <div class="metric-value">${todaysEntry ? todaysEntry.score : "N/A"}</div>
+    // Calculate future targets (20% improvement)
+    const futureScoreTarget = Math.round(recentScoreAvg * 1.2);
+    const futureTimeTarget = Math.round(recentTimeAvg * 1.2);
+    const futureBountyTarget = Math.round(recentBountyAvg * 1.2);
+
+    // Determine rankings for each metric
+    const scoreRankings = getRankings(todaysEntry ? todaysEntry.score : 0, Math.round(recentScoreAvg), futureScoreTarget);
+    const timeRankings = getRankings(todaysEntry ? todaysEntry.time_spent : 0, Math.round(recentTimeAvg), futureTimeTarget);
+    const bountyRankings = getRankings(todaysEntry ? todaysEntry.bounty : 0, Math.round(recentBountyAvg), futureBountyTarget);
+
+    document.getElementById('rankings-container').innerHTML = `
+        <div class="ranking-box ${scoreRankings.present.rank}">
+            <div class="ranking-title">Present Self</div>
+            <div class="ranking-value">${todaysEntry ? todaysEntry.score : "N/A"}</div>
+            <div class="ranking-detail">${scoreRankings.present.place} Place in Score</div>
+            <div class="ranking-detail">${timeRankings.present.place} Place in Time</div>
+            <div class="ranking-detail">${bountyRankings.present.place} Place in Bounty</div>
         </div>
-        <div class="metric-box">
-            <div class="metric-label">7-Day Avg Score</div>
-            <div class="metric-value">${Math.round(recentScoreAvg) || "N/A"}</div>
+        <div class="ranking-box ${scoreRankings.past.rank}">
+            <div class="ranking-title">Past Self (7d Avg)</div>
+            <div class="ranking-value">${Math.round(recentScoreAvg) || "N/A"}</div>
+            <div class="ranking-detail">${scoreRankings.past.place} Place in Score</div>
+            <div class="ranking-detail">${timeRankings.past.place} Place in Time</div>
+            <div class="ranking-detail">${bountyRankings.past.place} Place in Bounty</div>
         </div>
-        <div class="metric-box">
-            <div class="metric-label">Target Score</div>
-            <div class="metric-value">${Math.round(recentScoreAvg * 1.2) || "N/A"}</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Total Bounty</div>
-            <div class="metric-value">$${bounty.reduce((a, b) => a + b, 0)}</div>
+        <div class="ranking-box ${scoreRankings.future.rank}">
+            <div class="ranking-title">Future Self (Target)</div>
+            <div class="ranking-value">${futureScoreTarget || "N/A"}</div>
+            <div class="ranking-detail">${scoreRankings.future.place} Place in Score</div>
+            <div class="ranking-detail">${timeRankings.future.place} Place in Time</div>
+            <div class="ranking-detail">${bountyRankings.future.place} Place in Bounty</div>
         </div>
     `;
+}
+
+// Determine rankings for a metric
+function getRankings(present, past, future) {
+    // Create array of values and sort descending
+    const values = [present, past, future];
+    const sorted = [...values].sort((a, b) => b - a);
+    
+    return {
+        present: {
+            value: present,
+            rank: getRankClass(sorted.indexOf(present) + 1),
+            place: getPlaceText(sorted.indexOf(present) + 1)
+        },
+        past: {
+            value: past,
+            rank: getRankClass(sorted.indexOf(past) + 1),
+            place: getPlaceText(sorted.indexOf(past) + 1)
+        },
+        future: {
+            value: future,
+            rank: getRankClass(sorted.indexOf(future) + 1),
+            place: getPlaceText(sorted.indexOf(future) + 1)
+        }
+    };
+}
+
+// Get CSS class for ranking
+function getRankClass(rank) {
+    switch(rank) {
+        case 1: return 'first';
+        case 2: return 'second';
+        case 3: return 'third';
+        default: return '';
+    }
+}
+
+// Get place text
+function getPlaceText(rank) {
+    switch(rank) {
+        case 1: return '1st';
+        case 2: return '2nd';
+        case 3: return '3rd';
+        default: return `${rank}th`;
+    }
 }
 
 // Calculate moving averages for charts
@@ -80,10 +140,10 @@ function createCharts(labels, scores, timeSpent, bounty) {
     const pastSelfTime = calculateMovingAverage(timeSpent);
     const pastSelfBounty = calculateMovingAverage(bounty);
 
-    // Calculate ideal values (20% more than past self)
-    const idealSelfScore = pastSelfScore.map(value => value ? value * 1.2 : null);
-    const idealSelfTime = pastSelfTime.map(value => value ? value * 1.2 : null);
-    const idealSelfBounty = pastSelfBounty.map(value => value ? value * 1.2 : null);
+    // Calculate future targets (20% more than past self)
+    const futureSelfScore = pastSelfScore.map(value => value ? value * 1.2 : null);
+    const futureSelfTime = pastSelfTime.map(value => value ? value * 1.2 : null);
+    const futureSelfBounty = pastSelfBounty.map(value => value ? value * 1.2 : null);
 
     // Common chart configuration
     const chartConfig = {
@@ -140,11 +200,11 @@ function createCharts(labels, scores, timeSpent, bounty) {
                     backgroundColor: 'rgba(255, 159, 64, 0.1)',
                 },
                 { 
-                    label: 'Ideal Self (Target)', 
-                    data: idealSelfScore, 
-                    borderColor: 'var(--chart-ideal)', 
+                    label: 'Future Self (Target)', 
+                    data: futureSelfScore, 
+                    borderColor: 'var(--chart-future)', 
                     borderDash: [5, 5], 
-                    pointBackgroundColor: 'var(--chart-ideal)',
+                    pointBackgroundColor: 'var(--chart-future)',
                     backgroundColor: 'rgba(153, 102, 255, 0.1)',
                 }
             ]
@@ -157,12 +217,12 @@ function createCharts(labels, scores, timeSpent, bounty) {
             labels: labels,
             datasets: [
                 { 
-                    label: 'Time Spent', 
+                    label: 'Present Self', 
                     data: timeSpent, 
-                    borderColor: 'var(--chart-time)', 
+                    borderColor: 'var(--chart-present)', 
                     tension: 0.1, 
-                    pointBackgroundColor: 'var(--chart-time)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    pointBackgroundColor: 'var(--chart-present)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
                 },
                 { 
                     label: 'Past Self (7d Avg)', 
@@ -173,11 +233,11 @@ function createCharts(labels, scores, timeSpent, bounty) {
                     backgroundColor: 'rgba(255, 159, 64, 0.1)',
                 },
                 { 
-                    label: 'Ideal Self (Target)', 
-                    data: idealSelfTime, 
-                    borderColor: 'var(--chart-ideal)', 
+                    label: 'Future Self (Target)', 
+                    data: futureSelfTime, 
+                    borderColor: 'var(--chart-future)', 
                     borderDash: [5, 5], 
-                    pointBackgroundColor: 'var(--chart-ideal)',
+                    pointBackgroundColor: 'var(--chart-future)',
                     backgroundColor: 'rgba(153, 102, 255, 0.1)',
                 }
             ]
@@ -190,12 +250,12 @@ function createCharts(labels, scores, timeSpent, bounty) {
             labels: labels,
             datasets: [
                 { 
-                    label: 'Bounty Earned', 
+                    label: 'Present Self', 
                     data: bounty, 
-                    borderColor: 'var(--chart-bounty)', 
+                    borderColor: 'var(--chart-present)', 
                     tension: 0.1, 
-                    pointBackgroundColor: 'var(--chart-bounty)',
-                    backgroundColor: 'rgba(50, 205, 50, 0.1)',
+                    pointBackgroundColor: 'var(--chart-present)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
                 },
                 { 
                     label: 'Past Self (7d Avg)', 
@@ -206,11 +266,11 @@ function createCharts(labels, scores, timeSpent, bounty) {
                     backgroundColor: 'rgba(255, 159, 64, 0.1)',
                 },
                 { 
-                    label: 'Ideal Self (Target)', 
-                    data: idealSelfBounty, 
-                    borderColor: 'var(--chart-ideal)', 
+                    label: 'Future Self (Target)', 
+                    data: futureSelfBounty, 
+                    borderColor: 'var(--chart-future)', 
                     borderDash: [5, 5], 
-                    pointBackgroundColor: 'var(--chart-ideal)',
+                    pointBackgroundColor: 'var(--chart-future)',
                     backgroundColor: 'rgba(153, 102, 255, 0.1)',
                 }
             ]
