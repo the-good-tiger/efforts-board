@@ -1,1 +1,2 @@
-# requirement file
+# Minimal requirements for bug bounty dashboard
+# No specific dependencies needed
