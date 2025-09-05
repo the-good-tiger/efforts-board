@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Bounty Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🐛 Self-Competition Dashboard</h1>
+        <p>Tracking progress against Past Self and Ideal Self</p>
+    </header>
+
+    <main>
+        <section id="summary-container" class="summary">
+            <!-- JS will populate this -->
+        </section>
+
+        <section class="chart-section">
+            <h2>Effort Score</h2>
+            <div class="chart-container">
+                <canvas id="scoreChart"></canvas>
+            </div>
+        </section>
+
+        <section class="chart-section">
+            <h2>Time Investment (Minutes)</h2>
+            <div class="chart-container">
+                <canvas id="timeChart"></canvas>
+            </div>
+        </section>
+
+        <section class="chart-section">
+            <h2>Bounty Earned (USD)</h2>
+            <div class="chart-container">
+                <canvas id="bountyChart"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Logged via GitHub Issues | Updated automatically</p>
+    </footer>
+
+    <!-- Load Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Load our separate JavaScript file -->
+    <script src="script.js"></script>
+</body>
+</html>
