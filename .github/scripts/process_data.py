@@ -9,26 +9,44 @@ def parse_form_data(body):
     Parse the structured form data from GitHub's issue form
     """
     try:
-        # Remove JSON encoding if present
-        if body.startswith('"') and body.endswith('"'):
-            body = body[1:-1].replace('\\n', '\n')
+        # First try to parse as JSON if it's a string
+        if isinstance(body, str):
+            try:
+                body = json.loads(body)
+            except json.JSONDecodeError:
+                pass  # Not JSON, continue with string parsing
         
-        parsed_data = {}
-        lines = body.split('\n')
-        
-        current_field = None
-        for line in lines:
-            if line.startswith('### '):
-                current_field = line.replace('### ', '').strip().lower()
-                parsed_data[current_field] = []
-            elif current_field and line.strip() and not line.startswith('#'):
-                parsed_data[current_field].append(line.strip())
-        
-        # Convert lists to strings
-        for key in parsed_data:
-            parsed_data[key] = '\n'.join(parsed_data[key]).strip()
+        # Handle both string and pre-parsed JSON
+        if isinstance(body, dict):
+            # Already parsed as JSON, extract values directly
+            parsed_data = {}
+            for key, value in body.items():
+                if isinstance(value, str):
+                    parsed_data[key.lower()] = value
+                elif isinstance(value, list) and len(value) > 0:
+                    parsed_data[key.lower()] = value[0]
+            return parsed_data
+        else:
+            # String parsing fallback
+            if body.startswith('"') and body.endswith('"'):
+                body = body[1:-1].replace('\\n', '\n')
             
-        return parsed_data
+            parsed_data = {}
+            lines = body.split('\n')
+            
+            current_field = None
+            for line in lines:
+                if line.startswith('### '):
+                    current_field = line.replace('### ', '').strip().lower()
+                    parsed_data[current_field] = []
+                elif current_field and line.strip() and not line.startswith('#'):
+                    parsed_data[current_field].append(line.strip())
+            
+            # Convert lists to strings
+            for key in parsed_data:
+                parsed_data[key] = '\n'.join(parsed_data[key]).strip()
+                
+            return parsed_data
     except Exception as e:
         print(f"Error parsing form data: {e}")
         return {}
