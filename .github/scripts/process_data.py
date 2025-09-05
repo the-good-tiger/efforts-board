@@ -48,7 +48,7 @@ def parse_form_data(body):
         print(f"Error parsing form data: {e}")
         return {}
 
-def extract_data_from_issue(title, body):
+def extract_data_from_issue(title, body_file_path):
     """
     Extract data from issue title and body with better error handling
     """
@@ -60,8 +60,12 @@ def extract_data_from_issue(title, body):
         else:
             log_date = datetime.now().strftime("%Y-%m-%d")
 
+        # Read body from file
+        with open(body_file_path, 'r') as f:
+            body_content = f.read().strip()
+        
         # Parse form data
-        form_data = parse_form_data(body)
+        form_data = parse_form_data(body_content)
         
         # Extract values with defaults
         score = int(form_data.get('score', '0'))
@@ -79,16 +83,16 @@ def main():
     try:
         # Get arguments
         issue_title = sys.argv[1]
-        issue_body = sys.argv[2]
+        body_file_path = sys.argv[2]
         issue_number = sys.argv[3]
 
         print(f"Title: {issue_title}")
-        print(f"Body: {issue_body}")
+        print(f"Body file path: {body_file_path}")
         print(f"Number: {issue_number}")
 
         # Extract data
         log_date, score, time_spent, bounty, notes = extract_data_from_issue(
-            issue_title, issue_body
+            issue_title, body_file_path
         )
 
         # Create entry
