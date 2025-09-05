@@ -1,0 +1,43 @@
+---
+name: Daily Log
+description: Log your daily bug bounty efforts.
+title: "Daily Log - {{ date | date: '%Y-%m-%d' }}"
+labels: ["log"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the details for your work session.
+  - type: input
+    id: score
+    attributes:
+      label: Score
+      description: "Enter your daily score points"
+      placeholder: "e.g., 22"
+    validations:
+      required: true
+  - type: input
+    id: time_spent
+    attributes:
+      label: Time Spent (minutes)
+      description: "How many minutes did you work today?"
+      placeholder: "e.g., 180"
+    validations:
+      required: true
+  - type: input
+    id: bounty
+    attributes:
+      label: Bounty Earned (USD)
+      description: "How much bounty did you earn today?"
+      placeholder: "e.g., 0"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: "Briefly describe your focus or a key learning"
+      placeholder: "Optional notes about today's work..."
+    validations:
+      required: false
+---
