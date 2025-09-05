@@ -15,24 +15,25 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      # New step: Authenticate the GitHub CLI
       - name: Setup GitHub CLI
         run: |
           gh auth setup-git
-          gh auth status # This will show you it's using the token if you check the logs
+          gh auth status
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Explicitly pass the token to gh
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Process new log entry
         run: python .github/scripts/process_data.py "${{ github.event.issue.title }}" "${{ github.event.issue.body }}" ${{ github.event.issue.number }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For any other scripts that might need it
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit and push updated data
         run: |
