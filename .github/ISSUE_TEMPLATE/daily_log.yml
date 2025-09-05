@@ -1,13 +1,8 @@
----
 name: Daily Log
-description: Log your daily bug bounty efforts.
+description: Log your daily bug bounty efforts
 title: "Daily Log - {{ date | date: '%Y-%m-%d' }}"
 labels: ["log"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Please fill out the details for your work session.
   - type: input
     id: score
     attributes:
@@ -40,4 +35,3 @@ body:
       placeholder: "Optional notes about today's work..."
     validations:
       required: false
----
