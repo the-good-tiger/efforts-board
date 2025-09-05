@@ -9,22 +9,7 @@ def parse_form_data(body):
     Parse the structured form data from GitHub's issue form
     """
     try:
-        # Handle the case where body might be a JSON string
-        if isinstance(body, str) and body.strip().startswith('{'):
-            try:
-                body_data = json.loads(body)
-                # Extract values from the JSON structure
-                parsed_data = {}
-                for key, value in body_data.items():
-                    if isinstance(value, (str, int, float)):
-                        parsed_data[key.lower()] = str(value)
-                    elif isinstance(value, list) and value:
-                        parsed_data[key.lower()] = str(value[0])
-                return parsed_data
-            except json.JSONDecodeError:
-                pass  # Not JSON, continue with text parsing
-        
-        # Text-based parsing (original method)
+        # Remove JSON encoding if present
         if body.startswith('"') and body.endswith('"'):
             body = body[1:-1].replace('\\n', '\n')
         
