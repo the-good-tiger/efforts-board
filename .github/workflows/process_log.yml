@@ -41,21 +41,35 @@ jobs:
         run: sudo apt-get install -y jq
         
       - name: Process new log entry
-        run: |
-          # Create a temporary file with the issue body content
-          echo '${{ github.event.issue.body }}' > /tmp/issue_body.txt
-          
-          python .github/scripts/process_data.py \
-          "${{ github.event.issue.title }}" \
-          /tmp/issue_body.txt \
-          ${{ github.event.issue.number }}
+        # Issue title and body are attacker-controlled: anyone can open an issue
+        # on a public repository, and the `if` guard above passes on a title the
+        # attacker writes. Interpolating `${{ ... }}` directly into `run:` pastes
+        # that text into the script before the shell parses it, so a quote or a
+        # `$(...)` in an issue executes here -- with the `contents: write` token
+        # this job is granted. Passing the values through `env` instead means the
+        # shell expands them as data and never parses them as code.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          # Create a temporary file with the issue body content
+          printf '%s' "$ISSUE_BODY" > /tmp/issue_body.txt
+
+          python .github/scripts/process_data.py \
+          "$ISSUE_TITLE" \
+          /tmp/issue_body.txt \
+          "$ISSUE_NUMBER"
 
       - name: Commit and push updated data
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
           git add data.json
-          git commit -m "CI: Update data from issue ${{ github.event.issue.number }}"
+          git commit -m "CI: Update data from issue $ISSUE_NUMBER"
           git push
+        env:
+          # An integer, so not injectable -- but read from the environment for
+          # the same reason as above, so the pattern is uniform in this file.
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
